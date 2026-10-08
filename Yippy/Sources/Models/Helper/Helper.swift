@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import ApplicationServices
 
 class Helper {
     
@@ -34,7 +35,6 @@ class Helper {
         return Helper.accessControlHelper.isControlGranted(showPopup: showPopup)
     }
 }
-
 
 
 

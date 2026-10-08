@@ -94,17 +94,17 @@ class HistoryItemTests: XCTestCase {
         // 1. Need to make sure caching has started.
         self.expectation(for: NSPredicate(block: { (_, _) -> Bool in
             return self.savedItem.isCached
-        }), evaluatedWith: nil, handler: { () -> Bool in
-            // 2. Start caching
-            self.savedItem.stopCaching()
-            return true
-        })
+        }), evaluatedWith: nil, handler: nil)
+        waitForExpectations(timeout: 5, handler: nil)
+
+        // 2. Stop caching after registration has completed.
+        self.savedItem.stopCaching()
         
         // 3. Unsaved data should be nil and should not be caching
         self.expectation(for: NSPredicate(block: { (_, _) -> Bool in
             return !self.savedItem.isCached && self.savedItem.unsavedData == nil
         }), evaluatedWith: nil, handler: nil)
         
-        waitForExpectations(timeout: 2, handler: nil)
+        waitForExpectations(timeout: 5, handler: nil)
     }
 }

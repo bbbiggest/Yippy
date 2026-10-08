@@ -40,7 +40,7 @@ class PasteboardMonitorDelegateMock: PasteboardMonitorDelegate {
         self.expectation = expectation
     }
     
-    func pasteboardDidChange(_ pasteboard: NSPasteboard) {
+    func pasteboardDidChange(_ pasteboard: NSPasteboard, originBundleId: String?) {
         expectation.fulfill()
     }
 }

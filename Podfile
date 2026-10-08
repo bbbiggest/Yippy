@@ -1,6 +1,4 @@
-# Uncomment the next line to define a global platform for your project
-# platform :ios, '9.0'
-
+platform :osx, '12.0'
 
 project 'Yippy', {
   'Debug' => :debug,
@@ -16,7 +14,7 @@ target 'Yippy' do
 
     # Pods for Yippy
     pod 'Default'
-    pod 'LoginServiceKit', :git => 'https://github.com/Clipy/LoginServiceKit.git'
+    pod 'LoginServiceKit', :git => 'https://github.com/Clipy/LoginServiceKit.git', :tag => 'v2.5.0'
     pod 'RxSwift', '~> 5'
     pod 'RxCocoa', '~> 5'
 
@@ -26,7 +24,7 @@ target 'Yippy' do
         pod 'RxBlocking', '~> 5'
         pod 'RxTest', '~> 5'
         pod 'Default'
-        pod 'LoginServiceKit', :git => 'https://github.com/Clipy/LoginServiceKit.git'
+        pod 'LoginServiceKit', :git => 'https://github.com/Clipy/LoginServiceKit.git', :tag => 'v2.5.0'
         pod 'RxSwift', '~> 5'
         pod 'RxCocoa', '~> 5'
     end
@@ -37,8 +35,20 @@ target 'Yippy' do
         pod 'RxBlocking', '~> 5'
         pod 'RxTest', '~> 5'
         pod 'Default'
-        pod 'LoginServiceKit', :git => 'https://github.com/Clipy/LoginServiceKit.git'
+        pod 'LoginServiceKit', :git => 'https://github.com/Clipy/LoginServiceKit.git', :tag => 'v2.5.0'
         pod 'RxSwift', '~> 5'
         pod 'RxCocoa', '~> 5'
+    end
+end
+
+# Xcode 27 requires macOS 12 or later, including embedded pod targets.
+post_install do |installer|
+    installer.pods_project.targets.each do |target|
+        target.build_configurations.each do |config|
+            deployment_target = config.build_settings['MACOSX_DEPLOYMENT_TARGET']
+            if deployment_target.nil? || Gem::Version.new(deployment_target) < Gem::Version.new('12.0')
+                config.build_settings['MACOSX_DEPLOYMENT_TARGET'] = '12.0'
+            end
+        end
     end
 end
