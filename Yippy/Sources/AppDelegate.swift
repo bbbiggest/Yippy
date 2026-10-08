@@ -25,12 +25,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         showWelcomeIfNeeded()
 
         setupHotKey()
+
+        if CommandLine.arguments.contains("--show-history") {
+            Controller.main.state.isHistoryPanelShown.accept(true)
+        }
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
         
     }
-    
+
     func checkLaunchArgs() {
         if CommandLine.arguments.contains("--uitesting") {
             do {
