@@ -22,18 +22,27 @@ class YippyHistory {
         self.pasteboard = pasteboard
     }
     
-    func paste(selected: Int) {
-        guard preparePaste(selected: selected) else { return }
+    func paste(selected: Int, asPlainText: Bool = false, to destination: NSRunningApplication?) {
+        guard preparePaste(selected: selected, asPlainText: asPlainText) else { return }
 
         DispatchQueue.main.async {
-            self.executePaste(startTime: Date())
+            self.executePaste(startTime: Date(), destination: destination)
         }
     }
 
     @discardableResult
-    func preparePaste(selected: Int) -> Bool {
+    func preparePaste(selected: Int, asPlainText: Bool = false) -> Bool {
         guard let index = historyIndex(forDisplayedIndex: selected) else { return false }
         let item = history.items[index]
+        let writer: NSPasteboardWriting
+        if asPlainText {
+            guard let text = item.getPlainString() else { return false }
+            let plainItem = NSPasteboardItem()
+            guard plainItem.setString(text, forType: .string) else { return false }
+            writer = plainItem
+        } else {
+            writer = item
+        }
 
         // Internally action the pasteboard change
         // Our pasteboard monitor will detect the change
@@ -41,25 +50,41 @@ class YippyHistory {
         pasteboard.clearContents()
         
         // Write object
-        let written = pasteboard.writeObjects([item])
+        let written = pasteboard.writeObjects([writer])
         history.recordPasteboardChange(withCount: pasteboard.changeCount)
         guard written else { return false }
         history.moveItem(at: index, to: 0)
         return true
     }
     
-    private func executePaste(startTime: Date) {
-        if NSApp.isActive {
-            if Date().timeIntervalSince(startTime) > 2 {
+    private func executePaste(startTime: Date, destination: NSRunningApplication?) {
+        guard let destination = destination, !destination.isTerminated,
+            Helper.isControlGranted(), Date().timeIntervalSince(startTime) < 2 else {
+                showManualPasteHint()
                 return
-            }
+        }
+        let frontmost = NSWorkspace.shared.frontmostApplication?.processIdentifier
+        let current = NSRunningApplication.current.processIdentifier
+        guard frontmost == destination.processIdentifier || frontmost == current else {
+            showManualPasteHint()
+            return
+        }
+        let modifiers = NSEvent.modifierFlags.intersection([.command, .shift, .control, .option])
+        if frontmost == current || !modifiers.isEmpty {
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.03) {
-                self.executePaste(startTime: startTime)
+                self.executePaste(startTime: startTime, destination: destination)
             }
         }
         else {
             Helper.pressCommandV()
         }
+    }
+
+    private func showManualPasteHint() {
+        let alert = NSAlert()
+        alert.messageText = "Copied; automatic paste unavailable"
+        alert.informativeText = "Switch to the destination application and press Command + V to paste."
+        alert.runModal()
     }
     
     /// Returns the next item to select

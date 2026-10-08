@@ -126,6 +126,52 @@ class YippyHistoryTests: XCTestCase {
         }, evaluatedWith: nil)
         waitForExpectations(timeout: 3)
     }
+
+    func testPlainTextPastePreservesRichDataAndTheSavedFormatChoice() {
+        let previousPreference = HistoryItem.pastesRichText
+        defer { HistoryItem.pastesRichText = previousPreference }
+        let text = "Hello 世界 👋\nsecond\tline"
+        let richData = NSAttributedString(string: text).rtf(
+            from: NSRange(location: 0, length: (text as NSString).length), documentAttributes: [:])!
+        let item = HistoryItem(unsavedData: [.string: Data(text.utf8), .rtf: richData], cache: cache)
+        let history = self.history([item])
+        let displayed = YippyHistory(history: history, items: [item], pasteboard: pasteboard)
+
+        for richPreference in [true, false] {
+            HistoryItem.pastesRichText = richPreference
+
+            XCTAssertTrue(displayed.preparePaste(selected: 0, asPlainText: true))
+            // AppKit may advertise the legacy string alias alongside the modern type.
+            let textTypes: Set<NSPasteboard.PasteboardType> = [
+                .string, NSPasteboard.PasteboardType("NSStringPboardType")
+            ]
+            let writtenTypes = Set(pasteboard.types ?? [])
+            XCTAssertTrue(writtenTypes.contains(.string))
+            XCTAssertTrue(writtenTypes.isSubset(of: textTypes))
+            XCTAssertEqual(pasteboard.string(forType: .string), text)
+            XCTAssertEqual(HistoryItem.pastesRichText, richPreference)
+            XCTAssertEqual(item.data(forType: .rtf), richData)
+            history.pasteboardDidChange(pasteboard, originBundleId: nil)
+            XCTAssertEqual(history.items.count, 1)
+
+            XCTAssertTrue(displayed.preparePaste(selected: 0))
+            XCTAssertEqual(pasteboard.string(forType: .string), text)
+            XCTAssertEqual(pasteboard.data(forType: .rtf), richPreference ? richData : nil)
+        }
+    }
+
+    func testUnsupportedPlainTextPasteLeavesTheClipboardUntouched() {
+        for data: [NSPasteboard.PasteboardType: Data] in [[.tiff: Data()], [.rtf: Data()]] {
+            let item = HistoryItem(unsavedData: data, cache: cache)
+            let history = self.history([item])
+            let displayed = YippyHistory(history: history, items: [item], pasteboard: pasteboard)
+
+            XCTAssertFalse(displayed.preparePaste(selected: 0, asPlainText: true))
+
+            XCTAssertEqual(pasteboard.string(forType: .string), "unchanged")
+            XCTAssertEqual(history.items.first?.fsId, item.fsId)
+        }
+    }
 }
 
 private class SelectionHistoryFileManager: HistoryFileManager {

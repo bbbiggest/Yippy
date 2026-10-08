@@ -31,18 +31,22 @@ class YippyWindowController: NSWindowController {
         return windowController
     }
     
-    private var oldApp: NSRunningApplication?
+    private(set) var previousApplication: NSRunningApplication?
     
     func subscribeTo(toggle: BehaviorRelay<Bool>) -> Disposable {
         return toggle
             .subscribe(onNext: {
                 [] in
                 if !$0 {
+                    let wasFrontmost = NSWorkspace.shared.frontmostApplication?.processIdentifier
+                        == NSRunningApplication.current.processIdentifier
                     self.close()
-                    self.oldApp?.activate(options: .activateIgnoringOtherApps)
+                    if wasFrontmost {
+                        self.previousApplication?.activate(options: .activateIgnoringOtherApps)
+                    }
                 }
                 else {
-                    self.oldApp = NSWorkspace.shared.frontmostApplication
+                    self.previousApplication = NSWorkspace.shared.frontmostApplication
                     self.showWindow(nil)
                     self.window?.makeKey()
                     NSApp.activate(ignoringOtherApps: true)

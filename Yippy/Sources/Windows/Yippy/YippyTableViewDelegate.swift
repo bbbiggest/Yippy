@@ -9,6 +9,7 @@
 import Foundation
 
 protocol YippyTableViewDelegate {
+    func yippyTableView(_ tableView: YippyTableView, pasteItemWithId id: UUID, asPlainText: Bool)
     
     func yippyTableView(_ yippyTableView: YippyTableView, selectedDidChange selected: Int?)
     

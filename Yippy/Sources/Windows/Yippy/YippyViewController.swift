@@ -41,6 +41,13 @@ class YippyViewController: NSViewController {
     
     let results = BehaviorRelay(value: Results(items: [], isSearchResult: false))
     let selected = BehaviorRelay<Int?>(value: nil)
+    private var plainTextPasteMonitor: Any?
+
+    deinit {
+        if let monitor = plainTextPasteMonitor {
+            NSEvent.removeMonitor(monitor)
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,6 +72,18 @@ class YippyViewController: NSViewController {
             .disposed(by: disposeBag)
         
         searchBar.delegate = self
+
+        plainTextPasteMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self = self, State.main.isHistoryPanelShown.value,
+                self.view.window?.isKeyWindow == true,
+                event.keyCode == 36,
+                event.modifierFlags.intersection([.command, .shift, .control, .option]) == [.shift],
+                (self.searchBar.currentEditor() as? NSTextView)?.hasMarkedText() != true else { return event }
+            if let selected = self.yippyHistoryView.selected {
+                self.paste(selected: selected, asPlainText: true)
+            }
+            return nil
+        }
         
         // TODO: Fix hack to make onAllChange run initially
         selected.accept(1)
@@ -299,9 +318,16 @@ class YippyViewController: NSViewController {
         }
     }
     
-    private func paste(selected: Int) {
+    private func paste(selected: Int, asPlainText: Bool = false) {
+        guard yippyHistory.items.indices.contains(selected) else { return }
+        if asPlainText && yippyHistory.items[selected].getPlainString() == nil {
+            NSSound.beep()
+            return
+        }
+        let destination = Controller.main.yippyWindowController.previousApplication
+        let history = yippyHistory
         self.close()
-        yippyHistory.paste(selected: selected)
+        history.paste(selected: selected, asPlainText: asPlainText, to: destination)
     }
 }
 
@@ -312,6 +338,11 @@ extension YippyViewController: NSTextFieldDelegate {
 }
 
 extension YippyViewController: YippyTableViewDelegate {
+
+    func yippyTableView(_ tableView: YippyTableView, pasteItemWithId id: UUID, asPlainText: Bool) {
+        guard let index = yippyHistory.items.firstIndex(where: { $0.fsId == id }) else { return }
+        paste(selected: index, asPlainText: asPlainText)
+    }
     func yippyTableView(_ yippyTableView: YippyTableView, selectedDidChange selected: Int?) {
         self.selected.accept(selected)
     }

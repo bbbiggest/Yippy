@@ -80,6 +80,36 @@ class YippyTableView: NSTableView {
         self.isRichText = isRichText
         reloadData()
     }
+
+    override func menu(for event: NSEvent) -> NSMenu? {
+        let index = row(at: convert(event.locationInWindow, from: nil))
+        guard yippyItems.indices.contains(index) else { return nil }
+        let item = yippyItems[index]
+        selectItem(index)
+        yippyDelegate?.yippyTableView(self, selectedDidChange: index)
+
+        let menu = NSMenu()
+        menu.autoenablesItems = false
+        for plainText in [false, true] {
+            let action = NSMenuItem(title: plainText ? "Paste as Plain Text" : "Paste",
+                                    action: #selector(pasteContextItem(_:)), keyEquivalent: "\r")
+            action.target = self
+            action.representedObject = item.fsId
+            action.tag = plainText ? 1 : 0
+            action.keyEquivalentModifierMask = plainText ? [.shift] : []
+            action.isEnabled = !plainText || item.getPlainString() != nil
+            if !action.isEnabled {
+                action.toolTip = "No plain-text representation available"
+            }
+            menu.addItem(action)
+        }
+        return menu
+    }
+
+    @objc private func pasteContextItem(_ sender: NSMenuItem) {
+        guard let id = sender.representedObject as? UUID else { return }
+        yippyDelegate?.yippyTableView(self, pasteItemWithId: id, asPlainText: sender.tag == 1)
+    }
 }
 
 extension YippyTableView: NSTableViewDataSource {

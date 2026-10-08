@@ -1274,6 +1274,8 @@ To launch the Yippy clipboard history window simply use the keyboard shortcut: C
 
 The Yippy history window shows all the text items ever copied since Yippy has been running (in the background). The highlighted cell indicates that the item is selected and when return/enter is pressed, it will be saved as the current item to the clipboard and pasted into the current location of the cursor. Change the selected item either by clicking on another with the mouse or moving up and down with the arrow keys.
 
+To paste the selected item as plain text once, press Shift + Return or right-click it and choose Paste as Plain Text. The original formatting and your preferences are preserved.
+
 To preview items in full, toggle the space bar and a large preview window will appear of the current selected item.
 
 The default position for the Yippy is to float on the right edge of the screen, however this can be customized in the menu bar by clicking on the Yippy icon in the status bar.</string>

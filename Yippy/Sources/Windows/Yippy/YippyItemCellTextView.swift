@@ -10,6 +10,17 @@ import Foundation
 import Cocoa
 
 class YippyItemCellTextView: NSTextView {
+
+    override func menu(for event: NSEvent) -> NSMenu? {
+        var ancestor = superview
+        while let view = ancestor {
+            if let table = view as? YippyTableView {
+                return table.menu(for: event)
+            }
+            ancestor = view.superview
+        }
+        return super.menu(for: event)
+    }
     
     override func mouseDown(with event: NSEvent) {
         self.nextResponder?.mouseDown(with: event)
