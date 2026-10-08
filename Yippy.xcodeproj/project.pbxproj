@@ -106,7 +106,7 @@
 		34A30CC62356B94E00D4C2D6 /* History.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34A30CC52356B94E00D4C2D6 /* History.swift */; };
 		34ACFBBF22EB0B0F004E6E63 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34ACFBBE22EB0B0F004E6E63 /* AppDelegate.swift */; };
 		34ACFBC622EB0B11004E6E63 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 34ACFBC422EB0B11004E6E63 /* Main.storyboard */; };
-		34ACFBD222EB0B11004E6E63 /* YippyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34ACFBD122EB0B11004E6E63 /* YippyTests.swift */; };
+		34ACFBD222EB0B11004E6E63 /* YippyHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34ACFBD122EB0B11004E6E63 /* YippyHistoryTests.swift */; };
 		34ACFBDD22EB0B11004E6E63 /* YippyUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34ACFBDC22EB0B11004E6E63 /* YippyUITests.swift */; };
 		34ACFBEB22EB0D6A004E6E63 /* YippyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34ACFBEA22EB0D6A004E6E63 /* YippyViewController.swift */; };
 		34AF6CE62358079100E8F6CC /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34AF6CE52358079100E8F6CC /* Logger.swift */; };
@@ -266,7 +266,7 @@
 		34ACFBC722EB0B11004E6E63 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		34ACFBC822EB0B11004E6E63 /* Yippy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Yippy.entitlements; sourceTree = "<group>"; };
 		34ACFBCD22EB0B11004E6E63 /* YippyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YippyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		34ACFBD122EB0B11004E6E63 /* YippyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YippyTests.swift; sourceTree = "<group>"; };
+		34ACFBD122EB0B11004E6E63 /* YippyHistoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YippyHistoryTests.swift; sourceTree = "<group>"; };
 		34ACFBD322EB0B11004E6E63 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		34ACFBD822EB0B11004E6E63 /* YippyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YippyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		34ACFBDC22EB0B11004E6E63 /* YippyUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YippyUITests.swift; sourceTree = "<group>"; };
@@ -730,7 +730,7 @@
 				3426810C233D912E00BA226A /* PasteboardMonitorTests.swift */,
 				343F4119233C8C14004DA324 /* SettingsTests.swift */,
 				34268117233DE4EB00BA226A /* YippyHotKeyTests.swift */,
-				34ACFBD122EB0B11004E6E63 /* YippyTests.swift */,
+				34ACFBD122EB0B11004E6E63 /* YippyHistoryTests.swift */,
 			);
 			path = YippyTests;
 			sourceTree = "<group>";
@@ -1165,7 +1165,7 @@
 				349F7944235C24D4000CA5B9 /* HistoryFileManagerTests.swift in Sources */,
 				349F794A235C5722000CA5B9 /* WarningLoggerMock.swift in Sources */,
 				349F794C235C573D000CA5B9 /* AlerterMock.swift in Sources */,
-				34ACFBD222EB0B11004E6E63 /* YippyTests.swift in Sources */,
+				34ACFBD222EB0B11004E6E63 /* YippyHistoryTests.swift in Sources */,
 				34268113233D9EC500BA226A /* NSMenuItemFunctionalTests.swift in Sources */,
 				34CA0202235D742000EB067C /* HistoryFileManagerMock.swift in Sources */,
 				343C0BF1235C57F600129D23 /* ArrayFileManagerMock.swift in Sources */,

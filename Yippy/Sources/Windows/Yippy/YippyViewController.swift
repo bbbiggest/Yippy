@@ -29,6 +29,7 @@ class YippyViewController: NSViewController {
     var yippyHistory = YippyHistory(history: State.main.history, items: [])
     
     var searchEngine = SearchEngine(data: [])
+    var searchItems = [HistoryItem]()
     
     let disposeBag = DisposeBag()
     
@@ -160,7 +161,8 @@ class YippyViewController: NSViewController {
     }
     
     func updateSearchEngine(items: [HistoryItem]) {
-        self.searchEngine = SearchEngine(data: items.compactMap({$0.getPlainString()}))
+        searchItems = items
+        self.searchEngine = SearchEngine(data: items.map { $0.getPlainString() ?? "" })
     }
     
     func onAllChange(_ results: Results, _ selected: (Int?, Int?)) {
@@ -256,18 +258,20 @@ class YippyViewController: NSViewController {
     }
     
     func runSearch() {
-        searchEngine.search(query: searchBar.stringValue, completion: { result in
-            if (result.query.query.isEmpty) {
-                self.results.accept(Results(items: State.main.history.items, isSearchResult: false))
-                return
+        let engine = searchEngine
+        let items = searchItems
+        engine.search(query: searchBar.stringValue, completion: { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self = self, self.searchEngine === engine,
+                    self.searchBar.stringValue == result.query.query else { return }
+                if result.query.query.isEmpty {
+                    self.results.accept(Results(items: items, isSearchResult: false))
+                    return
+                }
+
+                let matches = result.results.compactMap { items.indices.contains($0) ? items[$0] : nil }
+                self.results.accept(Results(items: matches, isSearchResult: true))
             }
-            
-            var filteredData = [HistoryItem]()
-            for i in result.results {
-                filteredData.append(State.main.history.items[i])
-            }
-            
-            self.results.accept(Results(items: filteredData, isSearchResult: true))
         })
     }
     
