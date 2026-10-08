@@ -1,23 +1,22 @@
 # Yippy
 macOS open source clipboard manager
 
+This fork of [mattDavo/Yippy](https://github.com/mattDavo/Yippy) adds native Apple silicon support and lets you paste individual entries as plain text without changing your paste preferences.
+
 ![screenshot](images/screenshot.jpg)
 
-Follow progress at <a href="https://yippy.mattdavo.com" target="_blank">yippy.mattdavo.com</a>
+Upstream website: <a href="https://yippy.mattdavo.com" target="_blank">yippy.mattdavo.com</a>
 
-Read about the progress and learnings at <a href="https://yippy.mattdavo.com/blog" target="_blank">yippy.mattdavo.com/blog</a>
+Upstream development blog: <a href="https://yippy.mattdavo.com/blog" target="_blank">yippy.mattdavo.com/blog</a>
 
-Find all releases at <a href="https://yippy.mattdavo.com/releases" target="_blank">yippy.mattdavo.com/releases</a>
+Upstream releases: <a href="https://github.com/mattDavo/Yippy/releases" target="_blank">github.com/mattDavo/Yippy/releases</a>
 
 ## Installation
-Downloaded from <a href="https://yippy.mattdavo.com" target="_blank">yippy.mattdavo.com</a> or install with [Homebrew Cask](https://github.com/Homebrew/homebrew-cask):
-```
-brew install --cask yippy
-```
-
-For help with installation see: <a href="https://yippy.mattdavo.com/installation" target="_blank">yippy.mattdavo.com/installation</a>.
+This fork has no public release yet. Installation instructions will accompany the first release.
 
 ## Developing Yippy
+See the [development guide](docs/development.md) for build and test commands.
+
 ### Contributions
 All contributions are welcome, whether they are pull requests, bug reports, feature requests or general feedback.
 
@@ -48,7 +47,7 @@ You will find the installer disk image `X.dmg` in the same folder.
 - [x] Launch at login
 - [x] Convert history storage to storing each piece of data into a file organised by directory of indexes
 - [ ] Favourites
-- [ ] Search (https://github.com/krisk/fuse-swift)
+- [x] Search (https://github.com/krisk/fuse-swift)
 - [x] Max history length
 - [ ] Cell height cache improvements. Will improve window size changes and launch time.
     - [ ] Find a cheap way to clear the cell height cache
