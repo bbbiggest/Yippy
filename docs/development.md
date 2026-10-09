@@ -34,9 +34,10 @@ xcodebuild -workspace Yippy.xcworkspace \
   -destination 'platform=macOS,arch=arm64' \
   -derivedDataPath build/DerivedData \
   -only-testing:YippyTests/YippyHistoryTests \
+  -only-testing:YippyTests/URLEncodingTests \
   -only-testing:YippyTests/HistoryItemTests \
   -only-testing:YippyTests/SettingsTests \
   CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= test
 ```
 
-These tests cover history selection, plain-text preparation, data preservation, and preferences. Automatic paste into other applications requires separate manual testing.
+These tests cover history selection, paste preparation, data preservation, and preferences. Automatic paste into other applications requires separate manual testing.

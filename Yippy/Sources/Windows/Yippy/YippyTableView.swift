@@ -90,16 +90,24 @@ class YippyTableView: NSTableView {
 
         let menu = NSMenu()
         menu.autoenablesItems = false
-        for plainText in [false, true] {
-            let action = NSMenuItem(title: plainText ? "Paste as Plain Text" : "Paste",
-                                    action: #selector(pasteContextItem(_:)), keyEquivalent: "\r")
+        let actions: [(PasteMode, String)] = [
+            (.standard, "Paste"),
+            (.plainText, "Paste as Plain Text"),
+            (.urlEncoded, "Paste as URL-Encoded Text")
+        ]
+        let hasPlainText = item.getPlainString() != nil
+        for (mode, title) in actions {
+            let action = NSMenuItem(title: title, action: #selector(pasteContextItem(_:)),
+                                    keyEquivalent: mode == .urlEncoded ? "" : "\r")
             action.target = self
             action.representedObject = item.fsId
-            action.tag = plainText ? 1 : 0
-            action.keyEquivalentModifierMask = plainText ? [.shift] : []
-            action.isEnabled = !plainText || item.getPlainString() != nil
+            action.tag = mode.rawValue
+            action.keyEquivalentModifierMask = mode == .plainText ? [.shift] : []
+            action.isEnabled = mode == .standard || hasPlainText
             if !action.isEnabled {
                 action.toolTip = "No plain-text representation available"
+            } else if mode == .urlEncoded {
+                action.toolTip = "Encode text while preserving URL separators and existing percent escapes"
             }
             menu.addItem(action)
         }
@@ -107,8 +115,9 @@ class YippyTableView: NSTableView {
     }
 
     @objc private func pasteContextItem(_ sender: NSMenuItem) {
-        guard let id = sender.representedObject as? UUID else { return }
-        yippyDelegate?.yippyTableView(self, pasteItemWithId: id, asPlainText: sender.tag == 1)
+        guard let id = sender.representedObject as? UUID,
+            let mode = PasteMode(rawValue: sender.tag) else { return }
+        yippyDelegate?.yippyTableView(self, pasteItemWithId: id, mode: mode)
     }
 }
 

@@ -80,7 +80,7 @@ class YippyViewController: NSViewController {
                 event.modifierFlags.intersection([.command, .shift, .control, .option]) == [.shift],
                 (self.searchBar.currentEditor() as? NSTextView)?.hasMarkedText() != true else { return event }
             if let selected = self.yippyHistoryView.selected {
-                self.paste(selected: selected, asPlainText: true)
+                self.paste(selected: selected, mode: .plainText)
             }
             return nil
         }
@@ -318,16 +318,14 @@ class YippyViewController: NSViewController {
         }
     }
     
-    private func paste(selected: Int, asPlainText: Bool = false) {
+    private func paste(selected: Int, mode: PasteMode = .standard) {
         guard yippyHistory.items.indices.contains(selected) else { return }
-        if asPlainText && yippyHistory.items[selected].getPlainString() == nil {
+        let destination = Controller.main.yippyWindowController.previousApplication
+        guard yippyHistory.paste(selected: selected, mode: mode, to: destination) else {
             NSSound.beep()
             return
         }
-        let destination = Controller.main.yippyWindowController.previousApplication
-        let history = yippyHistory
         self.close()
-        history.paste(selected: selected, asPlainText: asPlainText, to: destination)
     }
 }
 
@@ -339,9 +337,9 @@ extension YippyViewController: NSTextFieldDelegate {
 
 extension YippyViewController: YippyTableViewDelegate {
 
-    func yippyTableView(_ tableView: YippyTableView, pasteItemWithId id: UUID, asPlainText: Bool) {
+    func yippyTableView(_ tableView: YippyTableView, pasteItemWithId id: UUID, mode: PasteMode) {
         guard let index = yippyHistory.items.firstIndex(where: { $0.fsId == id }) else { return }
-        paste(selected: index, asPlainText: asPlainText)
+        paste(selected: index, mode: mode)
     }
     func yippyTableView(_ yippyTableView: YippyTableView, selectedDidChange selected: Int?) {
         self.selected.accept(selected)

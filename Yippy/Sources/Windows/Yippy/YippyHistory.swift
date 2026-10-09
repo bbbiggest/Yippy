@@ -9,6 +9,12 @@
 import Foundation
 import Cocoa
 
+enum PasteMode: Int {
+    case standard
+    case plainText
+    case urlEncoded
+}
+
 class YippyHistory {
     
     let history: History
@@ -22,26 +28,30 @@ class YippyHistory {
         self.pasteboard = pasteboard
     }
     
-    func paste(selected: Int, asPlainText: Bool = false, to destination: NSRunningApplication?) {
-        guard preparePaste(selected: selected, asPlainText: asPlainText) else { return }
+    @discardableResult
+    func paste(selected: Int, mode: PasteMode = .standard, to destination: NSRunningApplication?) -> Bool {
+        guard preparePaste(selected: selected, mode: mode) else { return false }
 
         DispatchQueue.main.async {
             self.executePaste(startTime: Date(), destination: destination)
         }
+        return true
     }
 
     @discardableResult
-    func preparePaste(selected: Int, asPlainText: Bool = false) -> Bool {
+    func preparePaste(selected: Int, mode: PasteMode = .standard) -> Bool {
         guard let index = historyIndex(forDisplayedIndex: selected) else { return false }
         let item = history.items[index]
         let writer: NSPasteboardWriting
-        if asPlainText {
-            guard let text = item.getPlainString() else { return false }
-            let plainItem = NSPasteboardItem()
-            guard plainItem.setString(text, forType: .string) else { return false }
-            writer = plainItem
-        } else {
+        switch mode {
+        case .standard:
             writer = item
+        case .plainText, .urlEncoded:
+            guard let text = item.getPlainString() else { return false }
+            let output = mode == .urlEncoded ? URLEncoding.encode(text) : text
+            let plainItem = NSPasteboardItem()
+            guard plainItem.setString(output, forType: .string) else { return false }
+            writer = plainItem
         }
 
         // Internally action the pasteboard change

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E69403512FD7A001009AB001 /* URLEncoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = E69403512FD7A001009AB002 /* URLEncoding.swift */; };
+		E69403512FD7A001009AB003 /* URLEncodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E69403512FD7A001009AB004 /* URLEncodingTests.swift */; };
 		0C6529EB20DEF6F379A3C9F9 /* Pods_Yippy.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0ACFCB0B26BF8B8E6EF42EA /* Pods_Yippy.framework */; };
 		34010D2A234AB3F100C1218D /* YippyWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34010D29234AB3F100C1218D /* YippyWindow.swift */; };
 		340D3CA72361957100C2B335 /* ObservableType+WithPrevious.swift in Sources */ = {isa = PBXBuildFile; fileRef = 340D3CA62361957100C2B335 /* ObservableType+WithPrevious.swift */; };
@@ -165,6 +167,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E69403512FD7A001009AB002 /* URLEncoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLEncoding.swift; sourceTree = "<group>"; };
+		E69403512FD7A001009AB004 /* URLEncodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLEncodingTests.swift; sourceTree = "<group>"; };
 		04546907DC383E069F30ADBE /* Pods-YippyUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-YippyUITests.debug.xcconfig"; path = "Target Support Files/Pods-YippyUITests/Pods-YippyUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		06717A6CF5535260A83784EF /* Pods_YippyUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_YippyUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		202453EF7CD6236AEDFC2D28 /* Pods-Yippy.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Yippy.debug.xcconfig"; path = "Target Support Files/Pods-Yippy/Pods-Yippy.debug.xcconfig"; sourceTree = "<group>"; };
@@ -624,6 +628,7 @@
 		348D526123876A770024A5C7 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				E69403512FD7A001009AB002 /* URLEncoding.swift */,
 				34EC0FF52504AC79004E1A63 /* Search */,
 				345A900623ED422400A21334 /* CellHeightCache.swift */,
 				3465A8FF23EF84A2009EE52B /* Cache.swift */,
@@ -724,6 +729,7 @@
 		34ACFBD022EB0B11004E6E63 /* YippyTests */ = {
 			isa = PBXGroup;
 			children = (
+				E69403512FD7A001009AB004 /* URLEncodingTests.swift */,
 				34268116233DACC100BA226A /* ExtensionsTests */,
 				34B13757235BF942004AB5ED /* HistoryCacheTests.swift */,
 				349F7943235C24D4000CA5B9 /* HistoryFileManagerTests.swift */,
@@ -1053,6 +1059,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E69403512FD7A001009AB001 /* URLEncoding.swift in Sources */,
 				34010D2A234AB3F100C1218D /* YippyWindow.swift in Sources */,
 				341D9D292337251B008A2BE6 /* KeyActionHandler.swift in Sources */,
 				3423B1C1234D8AFF00B40715 /* HistoryItem.swift in Sources */,
@@ -1155,6 +1162,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E69403512FD7A001009AB003 /* URLEncodingTests.swift in Sources */,
 				34268115233DA69500BA226A /* ArrayFunctionalTests.swift in Sources */,
 				3426810D233D912E00BA226A /* PasteboardMonitorTests.swift in Sources */,
 				34268118233DE4EB00BA226A /* YippyHotKeyTests.swift in Sources */,
