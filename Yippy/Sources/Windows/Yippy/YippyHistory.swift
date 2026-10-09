@@ -69,18 +69,26 @@ class YippyHistory {
     
     private func executePaste(startTime: Date, destination: NSRunningApplication?) {
         guard let destination = destination, !destination.isTerminated,
-            Helper.isControlGranted(), Date().timeIntervalSince(startTime) < 2 else {
-                showManualPasteHint()
-                return
+            destination != NSRunningApplication.current else {
+            showManualPasteHint(reason: "The destination application is unavailable.")
+            return
+        }
+        guard Helper.isControlGranted() else {
+            showManualPasteHint(reason: "Yippy needs permission to send the paste shortcut.")
+            return
+        }
+        guard Date().timeIntervalSince(startTime) < 2 else {
+            showManualPasteHint(reason: "The destination did not become ready for automatic paste.")
+            return
         }
         let frontmost = NSWorkspace.shared.frontmostApplication?.processIdentifier
         let current = NSRunningApplication.current.processIdentifier
-        guard frontmost == destination.processIdentifier || frontmost == current else {
-            showManualPasteHint()
+        guard frontmost == nil || frontmost == destination.processIdentifier || frontmost == current else {
+            showManualPasteHint(reason: "The active application changed before pasting.")
             return
         }
         let modifiers = NSEvent.modifierFlags.intersection([.command, .shift, .control, .option])
-        if frontmost == current || !modifiers.isEmpty {
+        if frontmost != destination.processIdentifier || !modifiers.isEmpty {
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.03) {
                 self.executePaste(startTime: startTime, destination: destination)
             }
@@ -90,10 +98,10 @@ class YippyHistory {
         }
     }
 
-    private func showManualPasteHint() {
+    private func showManualPasteHint(reason: String) {
         let alert = NSAlert()
         alert.messageText = "Copied; automatic paste unavailable"
-        alert.informativeText = "Switch to the destination application and press Command + V to paste."
+        alert.informativeText = reason + "\n\nSwitch to the destination application and press Command + V to paste."
         alert.runModal()
     }
     

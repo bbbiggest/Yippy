@@ -1,4 +1,5 @@
 import XCTest
+import RxRelay
 @testable import Yippy
 
 class YippyHistoryTests: XCTestCase {
@@ -297,21 +298,65 @@ class YippyHistoryTests: XCTestCase {
         table.reloadData([item("replacement")], isRichText: false)
 
         for (index, mode) in [PasteMode.standard, .plainText, .urlEncoded].enumerated() {
+            let dispatched = expectation(description: "Context-menu paste dispatched")
+            delegate.onPaste = { dispatched.fulfill() }
             let action = menu.items[index]
             table.perform(try XCTUnwrap(action.action), with: action)
+            waitForExpectations(timeout: 1)
             XCTAssertEqual(delegate.pastedId, original.fsId)
             XCTAssertEqual(delegate.mode, mode)
         }
+    }
+
+    func testCellBackgroundAndTextUseTheTableContextMenu() throws {
+        let table = YippyTableView(frame: NSRect(x: 0, y: 0, width: 300, height: 100))
+        table.addTableColumn(NSTableColumn(identifier: NSUserInterfaceItemIdentifier("synthetic")))
+        let original = item("synthetic menu item")
+        table.reloadData([original], isRichText: false)
+        let cell = try XCTUnwrap(table.view(atColumn: 0, row: 0, makeIfNecessary: true) as? YippyItemBaseCellView)
+        let row = table.rect(ofRow: 0)
+        let point = table.convert(NSPoint(x: row.midX, y: row.midY), to: nil)
+        let event = try XCTUnwrap(NSEvent.mouseEvent(
+            with: .rightMouseDown, location: point, modifierFlags: [], timestamp: 0,
+            windowNumber: 0, context: nil, eventNumber: 0, clickCount: 1, pressure: 1))
+
+        for view in [cell, cell.itemTextView!, cell.shortcutTextView!] as [NSView] {
+            let menu = try XCTUnwrap(view.menu(for: event))
+            XCTAssertEqual(menu.items.map { $0.title }, ["Paste", "Paste as Plain Text", "Paste as URL-Encoded Text"])
+            XCTAssertTrue(menu.items.allSatisfy { ($0.representedObject as? UUID) == original.fsId })
+        }
+    }
+
+    func testContextMenuPasteWaitsUntilMenuTrackingEnds() throws {
+        let table = YippyTableView(frame: NSRect(x: 0, y: 0, width: 300, height: 100))
+        table.addTableColumn(NSTableColumn(identifier: NSUserInterfaceItemIdentifier("synthetic")))
+        let original = item("synthetic menu item")
+        table.reloadData([original], isRichText: false)
+        let delegate = PasteMenuDelegate()
+        table.yippyDelegate = delegate
+        let menu = try contextMenu(for: table)
+        let action = menu.items[2]
+        table.perform(try XCTUnwrap(action.action), with: action)
+
+        RunLoop.main.run(mode: .eventTracking, before: Date().addingTimeInterval(0.02))
+        XCTAssertNil(delegate.pastedId)
+        let dispatched = expectation(description: "Paste after returning to the default run loop")
+        delegate.onPaste = { dispatched.fulfill() }
+        waitForExpectations(timeout: 1)
+        XCTAssertEqual(delegate.pastedId, original.fsId)
+        XCTAssertEqual(delegate.mode, .urlEncoded)
     }
 }
 
 private class PasteMenuDelegate: YippyTableViewDelegate {
     var pastedId: UUID?
     var mode: PasteMode?
+    var onPaste: (() -> Void)?
 
     func yippyTableView(_ tableView: YippyTableView, pasteItemWithId id: UUID, mode: PasteMode) {
         pastedId = id
         self.mode = mode
+        onPaste?()
     }
 
     func yippyTableView(_ tableView: YippyTableView, selectedDidChange selected: Int?) {}
@@ -327,5 +372,254 @@ private class SelectionHistoryFileManager: HistoryFileManager {
     override func deleteItem(newHistory: [HistoryItem], deleted: HistoryItem,
                              completionHandler handler: ((Bool) -> Void)? = nil) {
         handler?(true)
+    }
+}
+
+private enum PasteTestState {
+    static var foreground: NSRunningApplication?
+    static var modifiers: NSEvent.ModifierFlags = []
+    static var hints: [String] = []
+    static var activationEvents: [String] = []
+}
+
+private final class PasteTestApplication: NSRunningApplication, @unchecked Sendable {
+    let testPid: pid_t
+    var testTerminated = false
+
+    init(pid: pid_t) {
+        testPid = pid
+        super.init()
+    }
+
+    override var processIdentifier: pid_t { testPid }
+    override var isTerminated: Bool { testTerminated }
+    override func isEqual(_ object: Any?) -> Bool { (object as? PasteTestApplication)?.testPid == testPid }
+    override var hash: Int { Int(testPid) }
+
+    override func activate(options: NSApplication.ActivationOptions = []) -> Bool {
+        PasteTestState.activationEvents.append("activate")
+        PasteTestState.foreground = self
+        return true
+    }
+
+    @available(macOS 14.0, *)
+    override func activate(from application: NSRunningApplication, options: NSApplication.ActivationOptions = []) -> Bool {
+        return activate(options: options)
+    }
+}
+
+extension NSWorkspace {
+    @objc fileprivate var pasteTestForeground: NSRunningApplication? { PasteTestState.foreground }
+}
+
+extension NSEvent {
+    @objc fileprivate class var pasteTestModifiers: NSEvent.ModifierFlags { PasteTestState.modifiers }
+}
+
+extension NSAlert {
+    @objc fileprivate func pasteTestRunModal() -> NSApplication.ModalResponse {
+        PasteTestState.hints.append(informativeText)
+        return .OK
+    }
+}
+
+extension NSApplication {
+    @objc fileprivate func pasteTestActivate(ignoringOtherApps: Bool) {
+        PasteTestState.foreground = .current
+    }
+
+    @available(macOS 14.0, *)
+    @objc fileprivate func pasteTestYield(to application: NSRunningApplication) {
+        PasteTestState.activationEvents.append("yield")
+    }
+}
+
+private final class PasteTestControl: AccessControlHelper {
+    var granted = true
+    override func isControlGranted() -> Bool { granted }
+}
+
+private final class PasteTestKeys: KeyPressHelper {
+    var count = 0
+    override func press(keyCode: CGKeyCode, flags: CGEventFlags) { count += 1 }
+}
+
+private final class PasteTestWindowController: YippyWindowController {
+    override func showWindow(_ sender: Any?) {}
+    override func close() {}
+}
+
+// Intercept system state and output so these tests need no permissions, running
+// destination apps, keyboard injection, modal dialogs, or general pasteboard.
+private final class PasteTestRuntime {
+    let control = PasteTestControl()
+    let keys = PasteTestKeys()
+    private let previousControl = Helper.accessControlHelper
+    private let previousKeys = Helper.keyPressHelper
+    private var methods: [(Method, Method)] = []
+
+    init() throws {
+        var selectors: [(AnyClass, Selector, Selector, Bool)] = [
+            (NSWorkspace.self, #selector(getter: NSWorkspace.frontmostApplication), #selector(getter: NSWorkspace.pasteTestForeground), false),
+            (NSEvent.self, #selector(getter: NSEvent.modifierFlags), #selector(getter: NSEvent.pasteTestModifiers), true),
+            (NSAlert.self, #selector(NSAlert.runModal), #selector(NSAlert.pasteTestRunModal), false),
+            (NSApplication.self, #selector(NSApplication.activate(ignoringOtherApps:)), #selector(NSApplication.pasteTestActivate(ignoringOtherApps:)), false)
+        ]
+        if #available(macOS 14.0, *) {
+            selectors.append((NSApplication.self, #selector(NSApplication.yieldActivation(to:)), #selector(NSApplication.pasteTestYield(to:)), false))
+        }
+        let resolved = try selectors.map { type, original, replacement, isClass in
+            (try XCTUnwrap(isClass ? class_getClassMethod(type, original) : class_getInstanceMethod(type, original)),
+             try XCTUnwrap(isClass ? class_getClassMethod(type, replacement) : class_getInstanceMethod(type, replacement)))
+        }
+        PasteTestState.foreground = nil
+        PasteTestState.modifiers = []
+        PasteTestState.hints = []
+        PasteTestState.activationEvents = []
+        methods = resolved
+        for (a, b) in methods { method_exchangeImplementations(a, b) }
+        Helper.accessControlHelper = control
+        Helper.keyPressHelper = keys
+    }
+
+    deinit {
+        Helper.accessControlHelper = previousControl
+        Helper.keyPressHelper = previousKeys
+        for (a, b) in methods.reversed() { method_exchangeImplementations(a, b) }
+    }
+}
+
+extension YippyHistoryTests {
+    private func waitForPasteResult(_ runtime: PasteTestRuntime) {
+        let deadline = Date().addingTimeInterval(3)
+        while runtime.keys.count == 0 && PasteTestState.hints.isEmpty && Date() < deadline {
+            RunLoop.main.run(until: Date().addingTimeInterval(0.01))
+        }
+    }
+
+    func testAutomaticPasteHandlesFocusHandoffAndModifierRelease() throws {
+        let runtime = try PasteTestRuntime()
+        let destination = PasteTestApplication(pid: 424242)
+        let values = [item("synthetic text")]
+        let displayed = YippyHistory(history: history(values), items: values, pasteboard: pasteboard)
+        for mode in [PasteMode.standard, .plainText, .urlEncoded] {
+            runtime.keys.count = 0
+            PasteTestState.foreground = .current
+            PasteTestState.modifiers = [.shift]
+            XCTAssertTrue(displayed.paste(selected: 0, mode: mode, to: destination))
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+                PasteTestState.foreground = destination
+                PasteTestState.modifiers = []
+            }
+            waitForPasteResult(runtime)
+            XCTAssertEqual(runtime.keys.count, 1)
+            XCTAssertTrue(PasteTestState.hints.isEmpty)
+            XCTAssertEqual(pasteboard.string(forType: .string), mode == .urlEncoded ? "synthetic%20text" : "synthetic text")
+        }
+    }
+
+    func testAutomaticPasteWaitsForTemporarilyUnknownForeground() throws {
+        let runtime = try PasteTestRuntime()
+        let destination = PasteTestApplication(pid: 424242)
+        let values = [item("synthetic text")]
+        let displayed = YippyHistory(history: history(values), items: values, pasteboard: pasteboard)
+        XCTAssertTrue(displayed.paste(selected: 0, mode: .plainText, to: destination))
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { PasteTestState.foreground = destination }
+        waitForPasteResult(runtime)
+        XCTAssertEqual(runtime.keys.count, 1)
+        XCTAssertTrue(PasteTestState.hints.isEmpty)
+    }
+
+    func testAutomaticPasteStopsForInvalidDestinationPermissionOrApplicationSwitch() throws {
+        let runtime = try PasteTestRuntime()
+        let destination = PasteTestApplication(pid: 424242)
+        let terminated = PasteTestApplication(pid: 424243)
+        terminated.testTerminated = true
+        let other = PasteTestApplication(pid: 424244)
+        let cases: [(NSRunningApplication?, NSRunningApplication, Bool)] = [
+            (nil, destination, true), (.current, .current, true),
+            (terminated, destination, true), (destination, destination, false),
+            (destination, other, true)
+        ]
+        let values = [item("synthetic text")]
+        let displayed = YippyHistory(history: history(values), items: values, pasteboard: pasteboard)
+        for (target, foreground, permission) in cases {
+            PasteTestState.hints = []
+            PasteTestState.foreground = foreground
+            runtime.control.granted = permission
+            XCTAssertTrue(displayed.paste(selected: 0, mode: .urlEncoded, to: target))
+            waitForPasteResult(runtime)
+            XCTAssertEqual(runtime.keys.count, 0)
+            XCTAssertEqual(PasteTestState.hints.count, 1)
+            XCTAssertEqual(pasteboard.string(forType: .string), "synthetic%20text")
+            XCTAssertTrue(PasteTestState.activationEvents.isEmpty)
+        }
+        XCTAssertTrue(PasteTestState.hints[0].contains("active application changed"))
+    }
+
+    func testAutomaticPasteTimesOutWhileModifiersRemainHeld() throws {
+        let runtime = try PasteTestRuntime()
+        let destination = PasteTestApplication(pid: 424242)
+        PasteTestState.foreground = destination
+        PasteTestState.modifiers = [.control]
+        let values = [item("synthetic text")]
+        let displayed = YippyHistory(history: history(values), items: values, pasteboard: pasteboard)
+        XCTAssertTrue(displayed.paste(selected: 0, mode: .plainText, to: destination))
+        waitForPasteResult(runtime)
+        XCTAssertEqual(runtime.keys.count, 0)
+        XCTAssertEqual(PasteTestState.hints.count, 1)
+        XCTAssertTrue(PasteTestState.hints[0].contains("did not become ready"))
+        XCTAssertEqual(pasteboard.string(forType: .string), "synthetic text")
+    }
+
+    func testPanelKeepsExternalDestinationAndRestoresItOnlyWhileYippyIsFrontmost() throws {
+        let runtime = try PasteTestRuntime()
+        let destination = PasteTestApplication(pid: 424242)
+        let other = PasteTestApplication(pid: 424243)
+        let controller = PasteTestWindowController(window: nil)
+        let toggle = BehaviorRelay<Bool>(value: false)
+        let subscription = controller.subscribeTo(toggle: toggle)
+        defer { subscription.dispose(); withExtendedLifetime(runtime) {} }
+
+        PasteTestState.foreground = destination
+        toggle.accept(true)
+        XCTAssertEqual(controller.previousApplication, destination)
+        toggle.accept(false)
+        XCTAssertEqual(PasteTestState.foreground, destination)
+        if #available(macOS 14.0, *) {
+            XCTAssertEqual(PasteTestState.activationEvents, ["yield", "activate"])
+        } else {
+            XCTAssertEqual(PasteTestState.activationEvents, ["activate"])
+        }
+
+        PasteTestState.foreground = .current
+        toggle.accept(true)
+        XCTAssertEqual(controller.previousApplication, destination)
+        PasteTestState.activationEvents = []
+        PasteTestState.foreground = other
+        toggle.accept(false)
+        XCTAssertTrue(PasteTestState.activationEvents.isEmpty)
+        XCTAssertEqual(PasteTestState.foreground, other)
+    }
+
+    func testPanelDiscardsStaleDestinationWhenForegroundCannotBeIdentified() throws {
+        let runtime = try PasteTestRuntime()
+        let destination = PasteTestApplication(pid: 424242)
+        let controller = PasteTestWindowController(window: nil)
+        let toggle = BehaviorRelay<Bool>(value: false)
+        let subscription = controller.subscribeTo(toggle: toggle)
+        defer { subscription.dispose(); withExtendedLifetime(runtime) {} }
+
+        PasteTestState.foreground = destination
+        toggle.accept(true)
+        toggle.accept(false)
+        XCTAssertEqual(controller.previousApplication, destination)
+
+        PasteTestState.foreground = nil
+        PasteTestState.activationEvents = []
+        toggle.accept(true)
+        XCTAssertNil(controller.previousApplication)
+        toggle.accept(false)
+        XCTAssertTrue(PasteTestState.activationEvents.isEmpty)
     }
 }

@@ -134,9 +134,14 @@ class YippyItemBaseCellView: NSTableCellView {
         updateShortcutTextViewContraints()
     }
     
-    override func rightMouseDown(with event: NSEvent) {
-        let menu = NSMenu(title: "Test").with(menuItem: NSMenuItem(title: "Options coming soon", action: nil, keyEquivalent: ""))
-        
-        menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+    override func menu(for event: NSEvent) -> NSMenu? {
+        var ancestor = superview
+        while let view = ancestor {
+            if let table = view as? YippyTableView {
+                return table.menu(for: event)
+            }
+            ancestor = view.superview
+        }
+        return super.menu(for: event)
     }
 }

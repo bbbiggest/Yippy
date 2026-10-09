@@ -41,12 +41,21 @@ class YippyWindowController: NSWindowController {
                     let wasFrontmost = NSWorkspace.shared.frontmostApplication?.processIdentifier
                         == NSRunningApplication.current.processIdentifier
                     self.close()
-                    if wasFrontmost {
-                        self.previousApplication?.activate(options: .activateIgnoringOtherApps)
+                    if wasFrontmost, let destination = self.previousApplication,
+                        destination != NSRunningApplication.current, !destination.isTerminated {
+                        if #available(macOS 14.0, *) {
+                            NSApp.yieldActivation(to: destination)
+                            destination.activate(from: .current, options: [])
+                        } else {
+                            destination.activate(options: .activateIgnoringOtherApps)
+                        }
                     }
                 }
                 else {
-                    self.previousApplication = NSWorkspace.shared.frontmostApplication
+                    let frontmost = NSWorkspace.shared.frontmostApplication
+                    if frontmost != NSRunningApplication.current {
+                        self.previousApplication = frontmost
+                    }
                     self.showWindow(nil)
                     self.window?.makeKey()
                     NSApp.activate(ignoringOtherApps: true)

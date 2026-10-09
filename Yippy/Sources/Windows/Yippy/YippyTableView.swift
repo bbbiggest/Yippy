@@ -117,7 +117,11 @@ class YippyTableView: NSTableView {
     @objc private func pasteContextItem(_ sender: NSMenuItem) {
         guard let id = sender.representedObject as? UUID,
             let mode = PasteMode(rawValue: sender.tag) else { return }
-        yippyDelegate?.yippyTableView(self, pasteItemWithId: id, mode: mode)
+        // Finish menu tracking before closing the panel and returning focus.
+        RunLoop.main.perform(inModes: [.default]) { [weak self] in
+            guard let self = self else { return }
+            self.yippyDelegate?.yippyTableView(self, pasteItemWithId: id, mode: mode)
+        }
     }
 }
 
