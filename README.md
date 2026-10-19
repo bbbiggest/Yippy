@@ -1,4 +1,4 @@
-# Yippy
+# Yippy2
 macOS open source clipboard manager
 
 This fork of [mattDavo/Yippy](https://github.com/mattDavo/Yippy) adds native Apple silicon support and lets you paste individual entries as plain text without changing your paste preferences.
@@ -26,7 +26,7 @@ There are 3 different schemes:
 - Yippy Beta
 - Yippy XCTest
 
-__Yippy__ is used for running and archiving a production build of Yippy. __Yippy Beta__ is used for development and archiving a beta release. __Yippy XCTest__ is used exclusively for running the unit and UI tests.
+__Yippy__ is used for running and archiving a production build of Yippy2. __Yippy Beta__ is used for development and archiving a beta release. __Yippy XCTest__ is used exclusively for running the unit and UI tests.
 
 ### Using `create-installer.sh`
 First install <a href="https://github.com/andreyvit/create-dmg" target="_blank">create-dmg</a>. Then place `X.app` in the same folder as `create-installer.sh`. Execute script:

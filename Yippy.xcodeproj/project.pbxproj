@@ -265,7 +265,7 @@
 		34A1942023553DD60076A717 /* FormatFileUrl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatFileUrl.swift; sourceTree = "<group>"; };
 		34A30CC32356B93900D4C2D6 /* HistoryCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryCache.swift; sourceTree = "<group>"; };
 		34A30CC52356B94E00D4C2D6 /* History.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = History.swift; sourceTree = "<group>"; };
-		34ACFBBB22EB0B0F004E6E63 /* Yippy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Yippy.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		34ACFBBB22EB0B0F004E6E63 /* Yippy2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Yippy2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		34ACFBBE22EB0B0F004E6E63 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		34ACFBC522EB0B11004E6E63 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		34ACFBC722EB0B11004E6E63 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -709,7 +709,7 @@
 		34ACFBBC22EB0B0F004E6E63 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				34ACFBBB22EB0B0F004E6E63 /* Yippy.app */,
+				34ACFBBB22EB0B0F004E6E63 /* Yippy2.app */,
 				34ACFBCD22EB0B11004E6E63 /* YippyTests.xctest */,
 				34ACFBD822EB0B11004E6E63 /* YippyUITests.xctest */,
 			);
@@ -811,7 +811,7 @@
 				34545E4F267715D600D6404D /* HotKey */,
 			);
 			productName = Yippy;
-			productReference = 34ACFBBB22EB0B0F004E6E63 /* Yippy.app */;
+			productReference = 34ACFBBB22EB0B0F004E6E63 /* Yippy2.app */;
 			productType = "com.apple.product-type.application";
 		};
 		34ACFBCC22EB0B11004E6E63 /* YippyTests */ = {
@@ -1363,8 +1363,8 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 0;
-				DEVELOPMENT_TEAM = HY8YZ2D6M7;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = "Yippy/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1372,10 +1372,10 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 2.8.1;
-				PRODUCT_BUNDLE_IDENTIFIER = MatthewDavidson.Yippy;
-				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				MARKETING_VERSION = 2.9.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.bbbiggest.yippy2;
+				PRODUCT_MODULE_NAME = Yippy;
+				PRODUCT_NAME = Yippy2;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 			};
@@ -1390,19 +1390,19 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 0;
-				DEVELOPMENT_TEAM = HY8YZ2D6M7;
-				ENABLE_HARDENED_RUNTIME = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "Yippy/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 2.8.1;
-				PRODUCT_BUNDLE_IDENTIFIER = MatthewDavidson.Yippy;
-				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				MARKETING_VERSION = 2.9.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.bbbiggest.yippy2;
+				PRODUCT_MODULE_NAME = Yippy;
+				PRODUCT_NAME = Yippy2;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 			};
@@ -1426,7 +1426,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = MatthewDavidson.YippyTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Yippy.app/Contents/MacOS/Yippy";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Yippy2.app/Contents/MacOS/Yippy2";
 			};
 			name = Debug;
 		};
@@ -1448,7 +1448,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = MatthewDavidson.YippyTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Yippy.app/Contents/MacOS/Yippy";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Yippy2.app/Contents/MacOS/Yippy2";
 			};
 			name = Release;
 		};

@@ -24,6 +24,14 @@ xcodebuild -workspace Yippy.xcworkspace \
 
 The app is `build/DerivedData/Build/Products/Beta Debug/Yippy Beta.app`. It uses separate preferences and history from upstream Yippy. Automatic paste requires Accessibility permission. This locally signed build is for development.
 
+To build and package a local Universal version of Yippy2 for both Intel and Apple silicon:
+
+```sh
+./scripts/package-local.sh
+```
+
+The `Yippy` scheme produces `build/LocalRelease/Build/Products/Release/Yippy2.app`; the ZIP and SHA-256 checksum are written to `build/`. Yippy2 uses bundle identifier `io.github.bbbiggest.yippy2`, with separate preferences and history from upstream Yippy and Yippy Beta. Existing data is not imported. The package is ad hoc signed for local testing; public distribution requires Developer ID signing and notarization.
+
 ## Tests
 
 Run the focused history, paste preparation, and settings tests:

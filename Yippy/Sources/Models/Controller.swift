@@ -67,10 +67,10 @@ class Controller {
     
     static func createMenu(settings: Settings, state: State, target: AnyObject?) -> NSMenu {
         let menu = NSMenu()
-            .with(menuItem: NSMenuItem(title: "About Yippy", action: #selector(showAboutWindow), keyEquivalent: "")
+            .with(menuItem: NSMenuItem(title: "About Yippy2", action: #selector(showAboutWindow), keyEquivalent: "")
                 .with(accessibilityIdentifier: Accessibility.identifiers.aboutButton)
             )
-            .with(menuItem: NSMenuItem(title: "Yippy Help", action: #selector(showHelpWindow), keyEquivalent: "")
+            .with(menuItem: NSMenuItem(title: "Yippy2 Help", action: #selector(showHelpWindow), keyEquivalent: "")
                 .with(accessibilityIdentifier: Accessibility.identifiers.helpButton)
             )
             .with(menuItem: NSMenuItem.separator())

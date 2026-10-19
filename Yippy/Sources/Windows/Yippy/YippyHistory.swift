@@ -74,7 +74,7 @@ class YippyHistory {
             return
         }
         guard Helper.isControlGranted() else {
-            showManualPasteHint(reason: "Yippy needs permission to send the paste shortcut.")
+            showManualPasteHint(reason: "Yippy2 needs permission to send the paste shortcut.")
             return
         }
         guard Date().timeIntervalSince(startTime) < 2 else {
